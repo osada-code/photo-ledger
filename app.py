@@ -20,7 +20,7 @@ from reportlab.pdfgen import canvas
 # ページ設定
 # -------------------------------------------------------
 st.set_page_config(
-    page_title="現場写真台帳 作成ツール",
+    page_title="写真台帳(A4,9枚)作成ツール",
     page_icon="📋",
     layout="centered",
 )
@@ -146,7 +146,7 @@ hr { border-color: #f0f0f0; margin: 24px 0; }
 # -------------------------------------------------------
 st.markdown("""
 <div class="app-header">
-    <h1><span class="accent-dot"></span>現場写真台帳 作成ツール</h1>
+    <h1><span class="accent-dot"></span>写真台帳(A4,9枚)作成ツール</h1>
     <p>写真をアップロード → PDF生成 → ダウンロード</p>
 </div>
 """, unsafe_allow_html=True)
