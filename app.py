@@ -270,8 +270,21 @@ if uploaded_files:
     st.markdown('<div class="section-label">✏️ STEP 2 ｜ キャプション編集・並び順変更</div>', unsafe_allow_html=True)
     st.caption("ファイル名を編集できます。▲▼ で並び順を変更できます。")
 
-    photo_list = st.session_state.photo_list
-    for idx, item in enumerate(photo_list):
+    # コールバック：並び替え前にキャプション編集内容を保存してから移動
+    def move_item(idx, direction):
+        # まず現在のテキスト入力値をセッションステートに反映
+        for i in range(len(st.session_state.photo_list)):
+            key = f"cap_{i}"
+            if key in st.session_state:
+                st.session_state.photo_list[i]["caption"] = st.session_state[key]
+        # 並び替え
+        lst = st.session_state.photo_list
+        new_idx = idx + direction
+        lst[idx], lst[new_idx] = lst[new_idx], lst[idx]
+
+    n = len(st.session_state.photo_list)
+    for idx in range(n):
+        item = st.session_state.photo_list[idx]
         cols = st.columns([0.5, 0.5, 6, 1, 1])
         cols[0].write(f"**{idx+1}**")
 
@@ -281,25 +294,24 @@ if uploaded_files:
         cols[1].image(thumb, use_container_width=False, width=48)
 
         # キャプション編集
-        new_cap = cols[2].text_input(
+        cols[2].text_input(
             f"caption_{idx}", value=item["caption"],
             label_visibility="collapsed", key=f"cap_{idx}"
         )
-        item["caption"] = new_cap
 
-        # 上へ
-        if cols[3].button("▲", key=f"up_{idx}", disabled=(idx == 0)):
-            lst = st.session_state.photo_list
-            lst.insert(idx - 1, lst.pop(idx))
-            st.session_state.photo_list = lst
-            st.rerun()
+        # 上へ（コールバック使用）
+        cols[3].button(
+            "▲", key=f"up_{idx}",
+            disabled=(idx == 0),
+            on_click=move_item, args=(idx, -1)
+        )
 
-        # 下へ
-        if cols[4].button("▼", key=f"dn_{idx}", disabled=(idx == len(st.session_state.photo_list) - 1)):
-            lst = st.session_state.photo_list
-            lst.insert(idx + 1, lst.pop(idx))
-            st.session_state.photo_list = lst
-            st.rerun()
+        # 下へ（コールバック使用）
+        cols[4].button(
+            "▼", key=f"dn_{idx}",
+            disabled=(idx == n - 1),
+            on_click=move_item, args=(idx, 1)
+        )
 
     st.markdown("---")
 
@@ -352,6 +364,12 @@ if uploaded_files:
     # 実行ボタン
     # -------------------------------------------------------
     if st.button("📄　PDF を作成する"):
+        # PDF生成前にキャプション編集内容を確定
+        for i in range(len(st.session_state.photo_list)):
+            key = f"cap_{i}"
+            if key in st.session_state:
+                st.session_state.photo_list[i]["caption"] = st.session_state[key]
+
         progress_bar = st.progress(0, text="準備中...")
         pdf_bytes = None
 
