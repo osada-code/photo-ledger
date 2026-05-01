@@ -243,7 +243,7 @@ uploaded_files = st.file_uploader(
 )
 
 # セッションステートでキャプションリストを管理
-if "items" not in st.session_state:
+if "items" not in st.session_state or not isinstance(st.session_state.items, list):
     st.session_state.items = []
 
 if uploaded_files:
@@ -253,7 +253,7 @@ if uploaded_files:
 
     # アップロード内容が変わったらリセット
     current_names = [f.name for f in uploaded_files_sorted]
-    stored_names  = [it["orig_name"] for it in st.session_state.items]
+    stored_names  = [it["orig_name"] for it in st.session_state.items if isinstance(it, dict) and "orig_name" in it]
     if current_names != stored_names:
         st.session_state.items = []
         for uf in uploaded_files_sorted:
