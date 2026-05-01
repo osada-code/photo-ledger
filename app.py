@@ -289,12 +289,16 @@ if uploaded_files:
 
         # 上へ
         if cols[3].button("▲", key=f"up_{idx}", disabled=(idx == 0)):
-            photo_list.insert(idx - 1, photo_list.pop(idx))
+            lst = st.session_state.photo_list
+            lst.insert(idx - 1, lst.pop(idx))
+            st.session_state.photo_list = lst
             st.rerun()
 
         # 下へ
-        if cols[4].button("▼", key=f"dn_{idx}", disabled=(idx == len(photo_list) - 1)):
-            photo_list.insert(idx + 1, photo_list.pop(idx))
+        if cols[4].button("▼", key=f"dn_{idx}", disabled=(idx == len(st.session_state.photo_list) - 1)):
+            lst = st.session_state.photo_list
+            lst.insert(idx + 1, lst.pop(idx))
+            st.session_state.photo_list = lst
             st.rerun()
 
     st.markdown("---")
