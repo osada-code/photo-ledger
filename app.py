@@ -243,8 +243,8 @@ uploaded_files = st.file_uploader(
 )
 
 # セッションステートでキャプションリストを管理
-if "items" not in st.session_state or not isinstance(st.session_state.items, list):
-    st.session_state.items = []
+if "photo_list" not in st.session_state or not isinstance(st.session_state.photo_list, list):
+    st.session_state.photo_list = []
 
 if uploaded_files:
     uploaded_files_sorted = sorted(
@@ -253,12 +253,12 @@ if uploaded_files:
 
     # アップロード内容が変わったらリセット
     current_names = [f.name for f in uploaded_files_sorted]
-    stored_names  = [it["orig_name"] for it in st.session_state.items if isinstance(it, dict) and "orig_name" in it]
+    stored_names  = [it["orig_name"] for it in st.session_state.photo_list if isinstance(it, dict) and "orig_name" in it]
     if current_names != stored_names:
-        st.session_state.items = []
+        st.session_state.photo_list = []
         for uf in uploaded_files_sorted:
             img = open_corrected(Image.open(uf))
-            st.session_state.items.append({
+            st.session_state.photo_list.append({
                 "orig_name": uf.name,
                 "caption":   unicodedata.normalize('NFC', uf.name),
                 "img":       img,
@@ -270,8 +270,8 @@ if uploaded_files:
     st.markdown('<div class="section-label">✏️ STEP 2 ｜ キャプション編集・並び順変更</div>', unsafe_allow_html=True)
     st.caption("ファイル名を編集できます。▲▼ で並び順を変更できます。")
 
-    items = st.session_state.items
-    for idx, item in enumerate(items):
+    photo_list = st.session_state.photo_list
+    for idx, item in enumerate(photo_list):
         cols = st.columns([0.5, 0.5, 6, 1, 1])
         cols[0].write(f"**{idx+1}**")
 
@@ -289,12 +289,12 @@ if uploaded_files:
 
         # 上へ
         if cols[3].button("▲", key=f"up_{idx}", disabled=(idx == 0)):
-            items.insert(idx - 1, items.pop(idx))
+            photo_list.insert(idx - 1, photo_list.pop(idx))
             st.rerun()
 
         # 下へ
         if cols[4].button("▼", key=f"dn_{idx}", disabled=(idx == len(items) - 1)):
-            items.insert(idx + 1, items.pop(idx))
+            photo_list.insert(idx + 1, photo_list.pop(idx))
             st.rerun()
 
     st.markdown("---")
@@ -352,7 +352,7 @@ if uploaded_files:
         pdf_bytes = None
 
         for current, total, result in build_pdf(
-            st.session_state.items, rotate, quality,
+            list(st.session_state.photo_list), rotate, quality,
             orientation, title_text, title_pos, title_size
         ):
             pct = int(current / total * 100)
@@ -366,14 +366,15 @@ if uploaded_files:
             JST       = timezone(timedelta(hours=9))
             timestamp = datetime.now(JST).strftime('%Y%m%d_%H%M')
             orient_str = "縦" if "portrait" in orientation else "横"
-            filename  = f"写真{len(items)}枚A4{orient_str}_{timestamp}.pdf"
+            n = len(st.session_state.photo_list)
+            filename  = f"写真{n}枚A4{orient_str}_{timestamp}.pdf"
             size_mb   = len(pdf_bytes) / 1024 / 1024
 
             st.markdown(f"""
             <div class="complete-card">
                 <h2>🎉 完成！</h2>
                 <div class="meta">
-                    {len(items)}枚の写真を処理しました<br>
+                    {n}枚の写真を処理しました<br>
                     ファイル名：{filename}<br>
                     サイズ：{size_mb:.1f} MB
                 </div>
