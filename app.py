@@ -126,7 +126,7 @@ def open_corrected(img: Image.Image) -> Image.Image:
 # -------------------------------------------------------
 # PDF生成
 # -------------------------------------------------------
-def build_pdf(items, rotate_portrait, quality,
+def build_pdf(photo_list_arg, rotate_portrait, quality,
               orientation, title_text, title_pos, title_size):
     """
     items: list of {"img": PIL.Image, "caption": str}
@@ -177,7 +177,7 @@ def build_pdf(items, rotate_portrait, quality,
     page_num = 0
     draw_title(page_num)
 
-    for i, item in enumerate(items):
+    for i, item in enumerate(photo_list_arg):
         page_idx = i % IMAGES_PER_PAGE
         if page_idx == 0 and i > 0:
             c.showPage()
@@ -220,11 +220,11 @@ def build_pdf(items, rotate_portrait, quality,
         c.setFillColor(colors.black)
         c.drawCentredString(cell_left + cell_w / 2, cell_top - cell_h + 4, caption)
 
-        yield i + 1, len(items), None
+        yield i + 1, len(photo_list_arg), None
 
     c.save()
     buf.seek(0)
-    yield len(items), len(items), buf.getvalue()
+    yield len(photo_list_arg), len(photo_list_arg), buf.getvalue()
 
 
 # ═══════════════════════════════════════════════════════
@@ -293,7 +293,7 @@ if uploaded_files:
             st.rerun()
 
         # 下へ
-        if cols[4].button("▼", key=f"dn_{idx}", disabled=(idx == len(items) - 1)):
+        if cols[4].button("▼", key=f"dn_{idx}", disabled=(idx == len(photo_list) - 1)):
             photo_list.insert(idx + 1, photo_list.pop(idx))
             st.rerun()
 
